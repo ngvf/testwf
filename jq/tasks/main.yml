@@ -1,0 +1,18 @@
+---
+- name: jq vars
+  set_fact:
+    jq_version: "1.6"
+
+- name: install jq
+  include_role:
+    name: install-1.0.5
+  vars:
+    opts:
+      file_mode: '755'
+      pkg_name: jq
+      pkg_version: "{{ jq_version }}"
+      pkg_type: ''
+      pkg_url: https://github.com/stedolan/jq/releases/download/jq-{{ jq_version }}/jq-linux64
+      bin_links:
+      - src: jq-{{ jq_version }}
+        dest: /usr/bin/jq

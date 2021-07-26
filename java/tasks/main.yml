@@ -1,0 +1,11 @@
+---
+- set_fact:
+    jdk_version: "{{ java_version | default(11) }}"
+
+- name: install java and tools
+  apt:
+    name:
+    - openjdk-{{ jdk_version }}-jdk-headless
+    - openjdk-{{ jdk_version }}-dbg
+    state: present
+    update_cache: yes

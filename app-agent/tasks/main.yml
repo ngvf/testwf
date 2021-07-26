@@ -1,0 +1,52 @@
+---
+- name: set up variables
+  set_fact:
+    app_agent_version: 1.0.6
+    transient_logging_dir: /opt/qingcloud/app-agent/log
+    persistent_logging_dir: /data/app-agent/logs
+
+- name: install packages
+  include_role:
+    name: install-1.0.5
+  vars:
+    opts:
+      pkg_name: app-agent
+      pkg_version: "{{ app_agent_version }}"
+      dest_path: /tmp/app-agent
+      pkg_url: https://github.com/QingCloudAppcenter/AppcenterAgent/releases/download/v{{ app_agent_version }}/app-agent-linux-amd64.tar.gz
+      pkg_type: tgz
+      extracts: yes
+      creates: bin
+
+- name: install app agent
+  shell:
+    cmd: ./install.sh
+    chdir: /tmp/app-agent
+    creates: /opt/qingcloud/app-agent/bin/confd
+
+- name: make logging files persistent
+  blockinfile:
+    path: /etc/init.d/confd
+    marker: "  # {mark} ANSIBLE MANAGED BLOCK"
+    insertafter: "^start"
+    block: |
+      # indent
+        if [ ! -d {{ persistent_logging_dir }} ]; then
+          mkdir -p {{ persistent_logging_dir }}
+          if [ -d {{ transient_logging_dir }} && ! -L {{ transient_logging_dir }} ]; then
+            rsync -aAX {{ transient_logging_dir }}/ {{ persistent_logging_dir }}/
+          fi
+        fi
+        rm -rf {{ transient_logging_dir }}
+        ln -snf {{persistent_logging_dir }} {{ transient_logging_dir }}
+
+- name: disable confd auto start
+  systemd:
+    name: confd
+    enabled: no
+
+- name: adjust logrotate
+  replace:
+    path: /etc/logrotate.d/app-agent
+    regexp: '^(\s+size).*'
+    replace: '\1 2M'

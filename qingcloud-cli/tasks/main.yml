@@ -1,0 +1,29 @@
+---
+- name: install setup tools
+  apt:
+    name: ['python3-setuptools']
+    state: present
+    update_cache: yes
+
+- name: set up mirror
+  copy:
+    dest: ~/.pydistutils.cfg
+    content: |
+      [easy_install]
+      index_url = https://pypi.doubanio.com/simple
+
+- name: install pip
+  apt:
+    name: python-pip
+    update_cache: yes
+
+- name: install qingcloud-cli
+  pip:
+    executable: pip
+    name: qingcloud-cli
+    version: "{{ qingcloud_cli_version }}"
+
+- name: set up mirror
+  file:
+    path: ~/.pydistutils.cfg
+    state: absent
