@@ -2,10 +2,10 @@ name: Make
 on:
   pull_request:
     branches:
-    - master
+    - main
   push:
     branches:
-    - master
+    - main
 
 jobs:
   make:
@@ -14,6 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
     - name: Make
       run: ./make.sh
